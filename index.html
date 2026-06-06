@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>DompetKu + Catatan Keuangan Online Anda</title>
+    <title>DompetKu | Kelola Keuangan Pintar</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Tesseract.js untuk OCR -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         * {
@@ -73,6 +74,13 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+        }
+        
+        .tagline {
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            font-weight: 500;
         }
 
         .auth-tabs {
@@ -199,7 +207,7 @@
             background: #e2e8f0;
         }
 
-        /* Stats Cards - DIPERBAIKI agar tidak ke samping dan rapi */
+        /* Stats Cards - RAPI KE BAWAH */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -606,9 +614,9 @@
     <div id="authSection" class="auth-wrapper">
         <div class="auth-card">
             <div class="logo-area">
-                <div class="logo-icon"><i class="fas fa-coins"></i></div>
-                <h2>CatatUang Pintar</h2>
-                <p style="color: #64748b;">#AturKeuanganMuDenganDompetKu</p>
+                <div class="logo-icon"><i class="fas fa-wallet"></i></div>
+                <h2>DompetKu</h2>
+                <p class="tagline">#AturKeuanganMuDenganDompetKu</p>
             </div>
             <div class="auth-tabs">
                 <button class="tab-btn active" data-tab="login">Masuk</button>
@@ -889,7 +897,6 @@
             resultDiv.scrollIntoView({ behavior: 'smooth' });
         }
         
-        // === LOGIC SAMA SEPERTI SEBELUMNYA, PERTAHANKAN FITUR ===
         function generateMathQuestion(type){
             let a = Math.floor(Math.random() * 9) + 2;
             let b = Math.floor(Math.random() * 9) + 2;
@@ -912,7 +919,7 @@
         function getUsers(){ return JSON.parse(localStorage.getItem('smart_users')||'[]'); }
         function saveUsers(u){ localStorage.setItem('smart_users',JSON.stringify(u)); }
 
-        if(!localStorage.getItem('smart_users')) saveUsers([{email:"demo@uangpintar.com",password:"demo123",name:"Demo User",transactions:[{id:Date.now()+1,description:"Gaji Bulanan",amount:5000000,type:"income",date:new Date().toISOString()},{id:Date.now()+2,description:"Makan Siang",amount:45000,type:"expense",date:new Date().toISOString()}]}]);
+        if(!localStorage.getItem('smart_users')) saveUsers([{email:"demo@dompetku.com",password:"demo123",name:"Demo User",transactions:[{id:Date.now()+1,description:"Gaji Bulanan",amount:5000000,type:"income",date:new Date().toISOString()},{id:Date.now()+2,description:"Makan Siang",amount:45000,type:"expense",date:new Date().toISOString()}]}]);
 
         function register(email,pass,name,answer){
             if(!email||!pass||!name) return "Lengkapi data!";
