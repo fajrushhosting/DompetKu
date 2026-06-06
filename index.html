@@ -6,7 +6,6 @@
     <title>CatatUang Pintar | Auto Scan Struk OCR + Senter</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Tesseract.js untuk OCR -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         * {
@@ -172,6 +171,8 @@
             border-radius: 1.5rem;
             margin-bottom: 1.5rem;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .user-greeting h3 { 
@@ -198,7 +199,7 @@
             background: #e2e8f0;
         }
 
-        /* Stats Cards */
+        /* Stats Cards - DIPERBAIKI agar tidak ke samping dan rapi */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -208,11 +209,15 @@
 
         .stat-card {
             background: white;
-            padding: 1.2rem;
+            padding: 1.2rem 0.8rem;
             border-radius: 1.2rem;
             text-align: center;
             transition: transform 0.2s;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         .stat-card:hover {
             transform: translateY(-2px);
@@ -230,19 +235,21 @@
             color: white;
         }
         .stat-title { 
-            font-size: 0.75rem; 
-            font-weight: 600; 
+            font-size: 0.7rem; 
+            font-weight: 700; 
             margin-bottom: 0.5rem;
             opacity: 0.9;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
         .stat-number { 
-            font-size: 1.6rem; 
+            font-size: 1.2rem; 
             font-weight: 800;
+            word-break: break-word;
+            line-height: 1.3;
         }
         .stat-icon {
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             margin-bottom: 0.3rem;
         }
 
@@ -251,6 +258,7 @@
             display: flex;
             gap: 1rem;
             margin-bottom: 1.5rem;
+            flex-wrap: wrap;
         }
 
         .action-btn {
@@ -265,6 +273,7 @@
             cursor: pointer;
             border: none;
             transition: all 0.2s;
+            min-width: 140px;
         }
         .action-btn.scan { 
             background: linear-gradient(135deg, #8b5cf6, #6d28d9); 
@@ -304,7 +313,6 @@
             gap: 0.5rem;
         }
 
-        /* TRANSACTION LIST */
         .transactions-list {
             max-height: 460px;
             overflow-y: auto;
@@ -322,6 +330,8 @@
             align-items: center;
             transition: all 0.2s;
             border-left: 3px solid transparent;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         .transaction-card.income-card {
             border-left-color: #10b981;
@@ -338,7 +348,8 @@
             display: flex;
             align-items: center;
             gap: 0.8rem;
-            flex: 1;
+            flex: 2;
+            min-width: 150px;
         }
 
         .transaction-icon {
@@ -369,8 +380,8 @@
 
         .transaction-amount {
             font-weight: 800;
-            font-size: 1rem;
-            margin-right: 0.8rem;
+            font-size: 0.95rem;
+            margin-right: 0.5rem;
         }
         .amount-income-text { color: #10b981; }
         .amount-expense-text { color: #ef4444; }
@@ -550,10 +561,40 @@
         }
 
         @media (max-width: 800px) {
-            .stats-grid { gap: 0.6rem; }
-            .stat-number { font-size: 1.2rem; }
-            .two-cols { grid-template-columns: 1fr; }
-            .action-group { flex-direction: column; }
+            .stats-grid { 
+                gap: 0.6rem; 
+            }
+            .stat-number { 
+                font-size: 0.95rem; 
+            }
+            .stat-title {
+                font-size: 0.6rem;
+            }
+            .stat-icon {
+                font-size: 1.2rem;
+            }
+            .two-cols { 
+                grid-template-columns: 1fr; 
+            }
+            .action-group { 
+                flex-direction: column; 
+            }
+            .transaction-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .transaction-amount {
+                margin-left: 48px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stat-number {
+                font-size: 0.85rem;
+            }
+            .stat-card {
+                padding: 0.8rem 0.4rem;
+            }
         }
 
         .error-msg { color: #dc2626; text-align: center; margin-top: 12px; font-size: 0.85rem; }
@@ -669,7 +710,7 @@
     </div>
 </div>
 
-<!-- MODAL CAMERA SCAN DENGAN OCR & SENTER -->
+<!-- MODAL CAMERA SCAN -->
 <div id="scanModal" class="modal">
     <div class="modal-card">
         <div class="modal-header">
@@ -709,7 +750,6 @@
         let mathLogin = {a:5,b:3,ans:15};
         let mathReg = {a:8,b:4,ans:32};
         
-        // Camera variables
         let video = document.getElementById('video');
         let stream = null;
         let currentFacingMode = 'environment';
@@ -727,7 +767,6 @@
                 video.srcObject = stream;
                 await video.play();
                 track = stream.getVideoTracks()[0];
-                // Matikan senter setiap kali buka kamera baru
                 if(flashActive) toggleFlashlight(false);
                 flashActive = false;
                 updateFlashButtonUI();
@@ -750,7 +789,7 @@
             if(!track) return false;
             const capabilities = track.getCapabilities();
             if(!capabilities.torch) {
-                alert("Device tidak mendukung fitur senter/flash untuk kamera ini.");
+                alert("Device tidak mendukung fitur senter untuk kamera ini.");
                 return false;
             }
             let newState = (forceState !== null) ? forceState : !flashActive;
@@ -761,7 +800,7 @@
                 return true;
             } catch(err) {
                 console.error("Gagal mengaktifkan senter:", err);
-                alert("Tidak dapat mengontrol senter untuk kamera ini.");
+                alert("Tidak dapat mengontrol senter.");
                 return false;
             }
         }
@@ -780,7 +819,6 @@
         }
         
         async function switchCamera() {
-            // matikan senter dulu sebelum ganti
             if(flashActive) await toggleFlashlight(false);
             currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
             await startCamera();
@@ -795,29 +833,19 @@
             track = null;
         }
         
-        // Fungsi OCR untuk ekstrak angka dari gambar
         async function extractNumberFromImage(imageDataUrl) {
             const ocrStatus = document.getElementById('ocrStatus');
             ocrStatus.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses OCR... Mendeteksi nominal dari struk';
             ocrStatus.style.display = 'block';
-            
             try {
-                const result = await Tesseract.recognize(
-                    imageDataUrl,
-                    'ind',
-                    {
-                        logger: m => console.log(m)
-                    }
-                );
+                const result = await Tesseract.recognize(imageDataUrl, 'ind', { logger: m => console.log(m) });
                 const text = result.data.text;
                 console.log("OCR Result:", text);
-                
                 const patterns = [
                     /Rp\s*[0-9.,]+/gi,
                     /[0-9]{1,3}(?:[.,][0-9]{3})*(?:[.,][0-9]+)?/g,
                     /[0-9]+(?:[.][0-9]{3})*/g
                 ];
-                
                 let foundNumbers = [];
                 for (let pattern of patterns) {
                     const matches = text.match(pattern);
@@ -825,26 +853,23 @@
                         matches.forEach(m => {
                             let cleanNum = m.replace(/Rp/gi, '').replace(/\./g, '').replace(/,/g, '');
                             let num = parseInt(cleanNum);
-                            if (!isNaN(num) && num > 1000) {
-                                foundNumbers.push(num);
-                            }
+                            if (!isNaN(num) && num > 1000) foundNumbers.push(num);
                         });
                     }
                 }
-                
                 if (foundNumbers.length > 0) {
                     let maxAmount = Math.max(...foundNumbers);
-                    ocrStatus.innerHTML = '<i class="fas fa-check-circle"></i> OCR Berhasil! Nominal terdeteksi: Rp ' + maxAmount.toLocaleString();
+                    ocrStatus.innerHTML = '<i class="fas fa-check-circle"></i> OCR Berhasil! Nominal: Rp ' + maxAmount.toLocaleString();
                     setTimeout(() => { ocrStatus.style.display = 'none'; }, 2000);
                     return maxAmount;
                 } else {
-                    ocrStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Tidak ditemukan nominal. Silakan input manual.';
+                    ocrStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Tidak ditemukan nominal. Input manual.';
                     setTimeout(() => { ocrStatus.style.display = 'none'; }, 2000);
                     return null;
                 }
             } catch (error) {
-                console.error("OCR Error:", error);
-                ocrStatus.innerHTML = '<i class="fas fa-times-circle"></i> Gagal membaca struk. Input manual.';
+                console.error(error);
+                ocrStatus.innerHTML = '<i class="fas fa-times-circle"></i> Gagal membaca struk.';
                 setTimeout(() => { ocrStatus.style.display = 'none'; }, 2000);
                 return null;
             }
@@ -857,17 +882,14 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-            
             const resultDiv = document.getElementById('scanResult');
             resultDiv.style.display = 'block';
-            
             const detectedAmount = await extractNumberFromImage(imageDataUrl);
-            if (detectedAmount) {
-                document.getElementById('scanAmount').value = detectedAmount;
-            }
+            if (detectedAmount) document.getElementById('scanAmount').value = detectedAmount;
             resultDiv.scrollIntoView({ behavior: 'smooth' });
         }
         
+        // === LOGIC SAMA SEPERTI SEBELUMNYA, PERTAHANKAN FITUR ===
         function generateMathQuestion(type){
             let a = Math.floor(Math.random() * 9) + 2;
             let b = Math.floor(Math.random() * 9) + 2;
@@ -900,7 +922,7 @@
             const userAnswer = parseInt(answer);
             if(isNaN(userAnswer) || userAnswer !== mathReg.ans){
                 generateMathQuestion('register');
-                return "Jawaban salah! Coba lagi dengan soal yang baru.";
+                return "Jawaban salah! Coba lagi.";
             }
             users.push({email,password:pass,name,transactions:[]});
             saveUsers(users);
@@ -911,7 +933,7 @@
             const userAnswer = parseInt(answer);
             if(isNaN(userAnswer) || userAnswer !== mathLogin.ans){
                 generateMathQuestion('login');
-                return "Verifikasi gagal! Jawaban salah. Coba lagi dengan soal baru.";
+                return "Verifikasi gagal! Jawaban salah.";
             }
             let user=getUsers().find(u=>u.email===email && u.password===pass);
             if(!user) return "Email atau password salah.";
@@ -975,7 +997,6 @@
         
         function escapeHtml(str){ if(!str) return ''; return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
 
-        // Modal camera logic
         let modal = document.getElementById('scanModal');
         async function openModal(){ 
             modal.style.display='flex'; 
@@ -1002,7 +1023,6 @@
             }
         }
 
-        // Event Listeners
         document.getElementById('doLogin').addEventListener('click',()=>{
             const res = login(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value, document.getElementById('loginMathAns').value);
             if(typeof res === 'string') document.getElementById('loginErr').innerText = res;
