@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>CatatUang Pintar | Auto Scan Struk OCR + Senter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Tesseract.js untuk OCR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Auth Styles */
+        .auth-wrapper {
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-card {
+            max-width: 460px;
+            width: 100%;
+            padding: 2rem;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.3);
+        }
+
+        .logo-icon i { font-size: 2.5rem; color: white; }
+        .auth-card h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1f2937, #10b981);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.8rem;
+            background: #f1f5f9;
+            padding: 0.5rem;
+            border-radius: 3rem;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #059669;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .input-field {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-field label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #334155;
+        }
+
+        .input-field input, .input-field select {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 1.2rem;
+            font-size: 0.95rem;
+            background: #fafcff;
+        }
+
+        .input-field input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .math-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 1rem;
+            border-radius: 1.2rem;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .math-question {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #92400e;
+            margin-bottom: 0.8rem;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 1rem;
+            border-radius: 2rem;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 1rem 1.8rem;
+            border-radius: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .user-greeting h3 { 
+            font-size: 1.3rem; 
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .user-greeting p { 
+            font-size: 0.8rem; 
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .logout-btn {
+            background: #f1f5f9;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .logout-btn:hover {
+            background: #e2e8f0;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.2rem;
+            border-radius: 1.2rem;
+            text-align: center;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        .stat-card.balance { 
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+        .stat-card.income { 
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        .stat-card.expense { 
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+        .stat-title { 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .stat-number { 
+            font-size: 1.6rem; 
+            font-weight: 800;
+        }
+        .stat-icon {
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        /* Action Buttons */
+        .action-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 0.9rem;
+            border-radius: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .action-btn.scan { 
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9); 
+            color: white; 
+        }
+        .action-btn.note { 
+            background: white; 
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 2 Columns Layout */
+        .two-cols {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 1.5rem;
+        }
+
+        .form-card, .history-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.3rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .form-card h4, .history-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* TRANSACTION LIST */
+        .transactions-list {
+            max-height: 460px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+        }
+
+        .transaction-card {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        .transaction-card.income-card {
+            border-left-color: #10b981;
+        }
+        .transaction-card.expense-card {
+            border-left-color: #ef4444;
+        }
+        .transaction-card:hover {
+            background: #f1f5f9;
+            transform: translateX(3px);
+        }
+
+        .transaction-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex: 1;
+        }
+
+        .transaction-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        .icon-income { background: #d1fae5; color: #059669; }
+        .icon-expense { background: #fee2e2; color: #dc2626; }
+
+        .transaction-details {
+            flex: 1;
+        }
+        .transaction-details .desc {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+            color: #1e293b;
+        }
+        .transaction-details .date {
+            font-size: 0.65rem;
+            color: #94a3b8;
+        }
+
+        .transaction-amount {
+            font-weight: 800;
+            font-size: 1rem;
+            margin-right: 0.8rem;
+        }
+        .amount-income-text { color: #10b981; }
+        .amount-expense-text { color: #ef4444; }
+
+        .delete-transaction {
+            background: transparent;
+            border: none;
+            color: #cbd5e1;
+            cursor: pointer;
+            padding: 0.4rem;
+            border-radius: 50%;
+            transition: all 0.2s;
+            width: 32px;
+            height: 32px;
+        }
+        .delete-transaction:hover {
+            color: #ef4444;
+            background: #fee2e2;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 2rem;
+            color: #94a3b8;
+        }
+
+        /* Modal Camera */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: white;
+            max-width: 500px;
+            width: 90%;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            animation: fadeInUp 0.3s;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 1rem;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 { margin: 0; font-size: 1.2rem; }
+        .close-modal {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .camera-container {
+            position: relative;
+            background: #000;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        video {
+            width: 100%;
+            height: auto;
+            max-height: 350px;
+            object-fit: cover;
+        }
+        .camera-controls {
+            padding: 0.8rem;
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+            background: #f1f5f9;
+            flex-wrap: wrap;
+        }
+        .cam-btn {
+            padding: 0.6rem 1rem;
+            border-radius: 2rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+        .cam-btn.capture { background: #10b981; color: white; }
+        .cam-btn.switch { background: #64748b; color: white; }
+        .cam-btn.flash { background: #f59e0b; color: white; }
+        .cam-btn.close-cam { background: #ef4444; color: white; }
+
+        .scan-result {
+            padding: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .ocr-loading {
+            text-align: center;
+            padding: 0.5rem;
+            color: #8b5cf6;
+            font-size: 0.8rem;
+        }
+
+        .type-choice {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 0.8rem;
+        }
+        .type-choice button {
+            flex: 1;
+            padding: 0.7rem;
+            border-radius: 2rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-income-choice { background: #10b981; color: white; }
+        .btn-expense-choice { background: #ef4444; color: white; }
+
+        /* DONASI SECTION */
+        .donation-section {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .donation-section h4 {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .donation-section p {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 0.8rem;
+        }
+        .donation-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 0.7rem 1.6rem;
+            border-radius: 2rem;
+            text-decoration: none;
+            font-weight: 700;
+            transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+        }
+        .donation-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+        }
+
+        @media (max-width: 800px) {
+            .stats-grid { gap: 0.6rem; }
+            .stat-number { font-size: 1.2rem; }
+            .two-cols { grid-template-columns: 1fr; }
+            .action-group { flex-direction: column; }
+        }
+
+        .error-msg { color: #dc2626; text-align: center; margin-top: 12px; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- AUTH SECTION -->
+    <div id="authSection" class="auth-wrapper">
+        <div class="auth-card">
+            <div class="logo-area">
+                <div class="logo-icon"><i class="fas fa-coins"></i></div>
+                <h2>CatatUang Pintar</h2>
+                <p style="color: #64748b;">#AturKeuanganMu</p>
+            </div>
+            <div class="auth-tabs">
+                <button class="tab-btn active" data-tab="login">Masuk</button>
+                <button class="tab-btn" data-tab="register">Daftar</button>
+            </div>
+            <div id="loginForm">
+                <div class="input-field"><label>Email</label><input type="email" id="loginEmail" placeholder="email@kamu.com"></div>
+                <div class="input-field"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••"></div>
+                <div class="math-box">
+                    <div class="math-question" id="loginMathQ">5 × 3 = ?</div>
+                    <input type="number" id="loginMathAns" placeholder="Jawaban" style="width:100%;padding:8px;border-radius:1rem;border:1px solid #e2e8f0;">
+                </div>
+                <button id="doLogin" class="btn-gradient"><i class="fas fa-arrow-right-to-bracket"></i> Masuk</button>
+                <div id="loginErr" class="error-msg"></div>
+            </div>
+            <div id="registerForm" class="hidden">
+                <div class="input-field"><label>Nama Lengkap</label><input type="text" id="regName" placeholder="Nama Anda"></div>
+                <div class="input-field"><label>Email</label><input type="email" id="regEmail" placeholder="email@kamu.com"></div>
+                <div class="input-field"><label>Password</label><input type="password" id="regPassword" placeholder="min. 6 karakter"></div>
+                <div class="math-box">
+                    <div class="math-question" id="regMathQ">8 × 4 = ?</div>
+                    <input type="number" id="regMathAns" placeholder="Jawaban" style="width:100%;padding:8px;border-radius:1rem;border:1px solid #e2e8f0;">
+                </div>
+                <button id="doRegister" class="btn-gradient"><i class="fas fa-user-plus"></i> Daftar</button>
+                <div id="regErr" class="error-msg"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="appDashboard" class="hidden">
+        <div class="dashboard-header">
+            <div class="user-greeting">
+                <h3><i class="fas fa-hand-peace"></i> Halo, <span id="userName">...</span></h3>
+                <p>Kelola uang masuk & keluar dengan mudah</p>
+            </div>
+            <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Keluar</button>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card balance">
+                <div class="stat-icon"><i class="fas fa-wallet"></i></div>
+                <div class="stat-title">Total Saldo</div>
+                <div class="stat-number" id="totalBalance">Rp0</div>
+            </div>
+            <div class="stat-card income">
+                <div class="stat-icon"><i class="fas fa-arrow-up"></i></div>
+                <div class="stat-title">Uang Masuk</div>
+                <div class="stat-number" id="totalIncome">Rp0</div>
+            </div>
+            <div class="stat-card expense">
+                <div class="stat-icon"><i class="fas fa-arrow-down"></i></div>
+                <div class="stat-title">Uang Keluar</div>
+                <div class="stat-number" id="totalExpense">Rp0</div>
+            </div>
+        </div>
+
+        <div class="action-group">
+            <button id="scanStrukBtn" class="action-btn scan"><i class="fas fa-camera"></i> Scan Struk (OCR)</button>
+            <button id="quickAddBtn" class="action-btn note"><i class="fas fa-pen-alt"></i> Catat Cepat</button>
+        </div>
+
+        <div class="two-cols">
+            <div class="form-card">
+                <h4><i class="fas fa-plus-circle" style="color:#10b981;"></i> Tambah Transaksi</h4>
+                <form id="transForm">
+                    <div class="input-field">
+                        <label>Deskripsi</label>
+                        <input type="text" id="transDesc" placeholder="Contoh: Gaji, Makan, Bensin">
+                    </div>
+                    <div class="input-field">
+                        <label>Jumlah (Rp)</label>
+                        <input type="number" id="transAmount" placeholder="0">
+                    </div>
+                    <div class="input-field">
+                        <label>Tipe</label>
+                        <select id="transType">
+                            <option value="income">📥 Uang Masuk</option>
+                            <option value="expense">📤 Uang Keluar</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-gradient">Simpan Transaksi</button>
+                </form>
+            </div>
+            <div class="history-card">
+                <h4><i class="fas fa-history" style="color:#8b5cf6;"></i> Riwayat Transaksi</h4>
+                <div id="transactionList" class="transactions-list"></div>
+            </div>
+        </div>
+        
+        <!-- DONASI SECTION -->
+        <div class="donation-section">
+            <h4><i class="fas fa-heart" style="color:#f59e0b;"></i> Dukung Pengembang</h4>
+            <p>Jika aplikasi ini bermanfaat, kamu bisa traktir kopi untuk developer 😊</p>
+            <a href="https://sociabuzz.com/fajrush/tribe" target="_blank" class="donation-btn">
+                <i class="fas fa-coffee"></i> Donasi Sekarang
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CAMERA SCAN DENGAN OCR & SENTER -->
+<div id="scanModal" class="modal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3><i class="fas fa-camera"></i> Scan Struk + Senter</h3>
+            <button class="close-modal" id="closeModalBtn">&times;</button>
+        </div>
+        <div class="camera-container">
+            <video id="video" autoplay playsinline></video>
+        </div>
+        <div class="camera-controls">
+            <button id="captureBtn" class="cam-btn capture"><i class="fas fa-camera"></i> Ambil & OCR</button>
+            <button id="switchCameraBtn" class="cam-btn switch"><i class="fas fa-sync-alt"></i> Ganti Kamera</button>
+            <button id="flashlightBtn" class="cam-btn flash"><i class="fas fa-lightbulb"></i> Senter</button>
+            <button id="closeCameraBtn" class="cam-btn close-cam"><i class="fas fa-times"></i> Tutup</button>
+        </div>
+        <div class="scan-result" id="scanResult" style="display:none;">
+            <div id="ocrStatus" class="ocr-loading"></div>
+            <div class="input-field">
+                <label>Nominal (Rp) - Hasil OCR</label>
+                <input type="number" id="scanAmount" placeholder="Nominal otomatis terdeteksi">
+            </div>
+            <div class="input-field">
+                <label>Deskripsi</label>
+                <input type="text" id="scanDesc" placeholder="Nama toko / barang">
+            </div>
+            <div class="type-choice">
+                <button id="chooseIncome" class="btn-income-choice"><i class="fas fa-arrow-up"></i> Uang Masuk</button>
+                <button id="chooseExpense" class="btn-expense-choice"><i class="fas fa-arrow-down"></i> Uang Keluar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        let currentUser = null;
+        let mathLogin = {a:5,b:3,ans:15};
+        let mathReg = {a:8,b:4,ans:32};
+        
+        // Camera variables
+        let video = document.getElementById('video');
+        let stream = null;
+        let currentFacingMode = 'environment';
+        let flashActive = false;
+        let track = null;
+        
+        async function startCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: { exact: currentFacingMode } }
+                });
+                video.srcObject = stream;
+                await video.play();
+                track = stream.getVideoTracks()[0];
+                // Matikan senter setiap kali buka kamera baru
+                if(flashActive) toggleFlashlight(false);
+                flashActive = false;
+                updateFlashButtonUI();
+            } catch (err) {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    video.srcObject = stream;
+                    await video.play();
+                    track = stream.getVideoTracks()[0];
+                    if(flashActive) toggleFlashlight(false);
+                    flashActive = false;
+                    updateFlashButtonUI();
+                } catch (error) {
+                    alert("Tidak dapat mengakses kamera. Pastikan izin kamera diberikan.");
+                }
+            }
+        }
+        
+        async function toggleFlashlight(forceState = null) {
+            if(!track) return false;
+            const capabilities = track.getCapabilities();
+            if(!capabilities.torch) {
+                alert("Device tidak mendukung fitur senter/flash untuk kamera ini.");
+                return false;
+            }
+            let newState = (forceState !== null) ? forceState : !flashActive;
+            try {
+                await track.applyConstraints({ advanced: [{ torch: newState }] });
+                flashActive = newState;
+                updateFlashButtonUI();
+                return true;
+            } catch(err) {
+                console.error("Gagal mengaktifkan senter:", err);
+                alert("Tidak dapat mengontrol senter untuk kamera ini.");
+                return false;
+            }
+        }
+        
+        function updateFlashButtonUI() {
+            const flashBtn = document.getElementById('flashlightBtn');
+            if(flashActive) {
+                flashBtn.innerHTML = '<i class="fas fa-lightbulb"></i> Senter Nyala';
+                flashBtn.style.background = "#fbbf24";
+                flashBtn.style.color = "#1e293b";
+            } else {
+                flashBtn.innerHTML = '<i class="fas fa-lightbulb"></i> Senter';
+                flashBtn.style.background = "#f59e0b";
+                flashBtn.style.color = "white";
+            }
+        }
+        
+        async function switchCamera() {
+            // matikan senter dulu sebelum ganti
+            if(flashActive) await toggleFlashlight(false);
+            currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+            await startCamera();
+        }
+        
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            video.srcObject = null;
+            track = null;
+        }
+        
+        // Fungsi OCR untuk ekstrak angka dari gambar
+        async function extractNumberFromImage(imageDataUrl) {
+            const ocrStatus = document.getElementById('ocrStatus');
+            ocrStatus.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses OCR... Mendeteksi nominal dari struk';
+            ocrStatus.style.display = 'block';
+            
+            try {
+                const result = await Tesseract.recognize(
+                    imageDataUrl,
+                    'ind',
+                    {
+                        logger: m => console.log(m)
+                    }
+                );
+                const text = result.data.text;
+                console.log("OCR Result:", text);
+                
+                const patterns = [
+                    /Rp\s*[0-9.,]+/gi,
+                    /[0-9]{1,3}(?:[.,][0-9]{3})*(?:[.,][0-9]+)?/g,
+                    /[0-9]+(?:[.][0-9]{3})*/g
+                ];
+                
+                let foundNumbers = [];
+                for (let pattern of patterns) {
+                    const matches = text.match(pattern);
+                    if (matches) {
+                        matches.forEach(m => {
+                            let cleanNum = m.replace(/Rp/gi, '').replace(/\./g, '').replace(/,/g, '');
+                            let num = parseInt(cleanNum);
+                            if (!isNaN(num) && num > 1000) {
+                                foundNumbers.push(num);
+                            }
+                        });
+                    }
+                }
+                
+                if (foundNumbers.length > 0) {
+                    let maxAmount = Math.max(...foundNumbers);
+                    ocrStatus.innerHTML = '<i class="fas fa-check-circle"></i> OCR Berhasil! Nominal terdeteksi: Rp ' + maxAmount.toLocaleString();
+                    setTimeout(() => { ocrStatus.style.display = 'none'; }, 2000);
+                    return maxAmount;
+                } else {
+                    ocrStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Tidak ditemukan nominal. Silakan input manual.';
+                    setTimeout(() => { ocrStatus.style.display = 'none'; }, 2000);
+                    return null;
+                }
+            } catch (error) {
+                console.error("OCR Error:", error);
+                ocrStatus.innerHTML = '<i class="fas fa-times-circle"></i> Gagal membaca struk. Input manual.';
+                setTimeout(() => { ocrStatus.style.display = 'none'; }, 2000);
+                return null;
+            }
+        }
+        
+        async function captureAndOCR() {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            
+            const resultDiv = document.getElementById('scanResult');
+            resultDiv.style.display = 'block';
+            
+            const detectedAmount = await extractNumberFromImage(imageDataUrl);
+            if (detectedAmount) {
+                document.getElementById('scanAmount').value = detectedAmount;
+            }
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function generateMathQuestion(type){
+            let a = Math.floor(Math.random() * 9) + 2;
+            let b = Math.floor(Math.random() * 9) + 2;
+            let answer = a * b;
+            if(type === 'login'){
+                mathLogin = {a, b, ans: answer};
+                const el = document.getElementById('loginMathQ');
+                if(el) el.innerText = `${a} × ${b} = ?`;
+                const inputEl = document.getElementById('loginMathAns');
+                if(inputEl) inputEl.value = '';
+            } else {
+                mathReg = {a, b, ans: answer};
+                const el = document.getElementById('regMathQ');
+                if(el) el.innerText = `${a} × ${b} = ?`;
+                const inputEl = document.getElementById('regMathAns');
+                if(inputEl) inputEl.value = '';
+            }
+        }
+
+        function getUsers(){ return JSON.parse(localStorage.getItem('smart_users')||'[]'); }
+        function saveUsers(u){ localStorage.setItem('smart_users',JSON.stringify(u)); }
+
+        if(!localStorage.getItem('smart_users')) saveUsers([{email:"demo@uangpintar.com",password:"demo123",name:"Demo User",transactions:[{id:Date.now()+1,description:"Gaji Bulanan",amount:5000000,type:"income",date:new Date().toISOString()},{id:Date.now()+2,description:"Makan Siang",amount:45000,type:"expense",date:new Date().toISOString()}]}]);
+
+        function register(email,pass,name,answer){
+            if(!email||!pass||!name) return "Lengkapi data!";
+            if(pass.length<6) return "Password minimal 6 karakter.";
+            let users=getUsers();
+            if(users.find(u=>u.email===email)) return "Email sudah terdaftar.";
+            const userAnswer = parseInt(answer);
+            if(isNaN(userAnswer) || userAnswer !== mathReg.ans){
+                generateMathQuestion('register');
+                return "Jawaban salah! Coba lagi dengan soal yang baru.";
+            }
+            users.push({email,password:pass,name,transactions:[]});
+            saveUsers(users);
+            return true;
+        }
+        
+        function login(email,pass,answer){
+            const userAnswer = parseInt(answer);
+            if(isNaN(userAnswer) || userAnswer !== mathLogin.ans){
+                generateMathQuestion('login');
+                return "Verifikasi gagal! Jawaban salah. Coba lagi dengan soal baru.";
+            }
+            let user=getUsers().find(u=>u.email===email && u.password===pass);
+            if(!user) return "Email atau password salah.";
+            return user;
+        }
+
+        function updateUserTransactions(email,newTx){
+            let users=getUsers();
+            let idx=users.findIndex(u=>u.email===email);
+            if(idx!==-1){ users[idx].transactions=newTx; saveUsers(users); if(currentUser?.email===email) currentUser=users[idx]; }
+        }
+
+        function addTransaction(desc,amount,type){
+            if(!desc||amount<=0) return false;
+            let tx = {id:Date.now(),description:desc,amount:parseFloat(amount),type,date:new Date().toISOString()};
+            let newList = [tx, ...(currentUser.transactions||[])];
+            updateUserTransactions(currentUser.email,newList);
+            renderDashboard();
+            return true;
+        }
+
+        function deleteTx(id){
+            let filtered = (currentUser.transactions||[]).filter(t=>t.id!=id);
+            updateUserTransactions(currentUser.email,filtered);
+            renderDashboard();
+        }
+
+        function formatRp(n){ return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(n); }
+        function formatDate(d){ return new Date(d).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}); }
+
+        function renderDashboard(){
+            if(!currentUser) return;
+            document.getElementById('userName').innerText = currentUser.name.split(' ')[0];
+            let tx = currentUser.transactions||[];
+            let inc=0, exp=0;
+            tx.forEach(t=>{ if(t.type==='income') inc+=t.amount; else exp+=t.amount; });
+            document.getElementById('totalBalance').innerText = formatRp(inc-exp);
+            document.getElementById('totalIncome').innerText = formatRp(inc);
+            document.getElementById('totalExpense').innerText = formatRp(exp);
+            let container = document.getElementById('transactionList');
+            if(!tx.length){ container.innerHTML='<div class="empty-message"><i class="fas fa-receipt"></i><p>Belum ada catatan. Scan struk atau tambah sekarang!</p></div>'; return; }
+            container.innerHTML = tx.map(t => `
+                <div class="transaction-card ${t.type==='income'?'income-card':'expense-card'}">
+                    <div class="transaction-info">
+                        <div class="transaction-icon ${t.type==='income'?'icon-income':'icon-expense'}">
+                            <i class="fas ${t.type==='income'?'fa-arrow-up':'fa-arrow-down'}"></i>
+                        </div>
+                        <div class="transaction-details">
+                            <div class="desc">${escapeHtml(t.description)}</div>
+                            <div class="date"><i class="far fa-calendar-alt"></i> ${formatDate(t.date)}</div>
+                        </div>
+                    </div>
+                    <div class="transaction-amount ${t.type==='income'?'amount-income-text':'amount-expense-text'}">
+                        ${t.type==='income'?'+':'-'} ${formatRp(t.amount)}
+                    </div>
+                    <button class="delete-transaction" data-id="${t.id}"><i class="fas fa-trash-alt"></i></button>
+                </div>
+            `).join('');
+            document.querySelectorAll('.delete-transaction').forEach(btn=>btn.addEventListener('click',(e)=>{ deleteTx(parseInt(btn.dataset.id)); }));
+        }
+        
+        function escapeHtml(str){ if(!str) return ''; return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+        // Modal camera logic
+        let modal = document.getElementById('scanModal');
+        async function openModal(){ 
+            modal.style.display='flex'; 
+            await startCamera();
+            document.getElementById('scanResult').style.display='none';
+            document.getElementById('scanAmount').value='';
+            document.getElementById('scanDesc').value='';
+            document.getElementById('ocrStatus').style.display = 'none';
+        }
+        function closeModal(){ 
+            if(flashActive) toggleFlashlight(false);
+            modal.style.display='none'; 
+            stopCamera();
+        }
+        
+        function processScan(type){
+            let amount = parseFloat(document.getElementById('scanAmount').value);
+            let desc = document.getElementById('scanDesc').value.trim();
+            if(isNaN(amount)||amount<=0) return alert("Nominal tidak valid!");
+            if(!desc) return alert("Deskripsi harus diisi!");
+            if(confirm(`Tambahkan ${type==='income'?'PEMASUKAN':'PENGELUARAN'}?\n${desc}\n${formatRp(amount)}`)){
+                addTransaction(desc,amount,type);
+                closeModal();
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('doLogin').addEventListener('click',()=>{
+            const res = login(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value, document.getElementById('loginMathAns').value);
+            if(typeof res === 'string') document.getElementById('loginErr').innerText = res;
+            else { currentUser = res; document.getElementById('authSection').classList.add('hidden'); document.getElementById('appDashboard').classList.remove('hidden'); renderDashboard(); generateMathQuestion('login'); generateMathQuestion('reg'); document.getElementById('loginErr').innerText = ''; }
+        });
+        
+        document.getElementById('doRegister').addEventListener('click',()=>{
+            const res = register(document.getElementById('regEmail').value, document.getElementById('regPassword').value, document.getElementById('regName').value, document.getElementById('regMathAns').value);
+            if(res === true){ alert("Pendaftaran berhasil! Silakan login."); document.querySelector('[data-tab="login"]').click(); document.getElementById('loginEmail').value = document.getElementById('regEmail').value; generateMathQuestion('login'); }
+            else document.getElementById('regErr').innerText = res;
+        });
+        
+        document.getElementById('logoutBtn').addEventListener('click',()=>{ currentUser = null; document.getElementById('authSection').classList.remove('hidden'); document.getElementById('appDashboard').classList.add('hidden'); generateMathQuestion('login'); generateMathQuestion('reg'); });
+        
+        document.getElementById('transForm').addEventListener('submit',(e)=>{ e.preventDefault(); let desc=document.getElementById('transDesc').value.trim(); let amt=parseFloat(document.getElementById('transAmount').value); let type=document.getElementById('transType').value; if(!desc||isNaN(amt)||amt<=0) alert("Isi dengan benar!"); else addTransaction(desc,amt,type); document.getElementById('transDesc').value=''; document.getElementById('transAmount').value=''; });
+        
+        document.getElementById('scanStrukBtn').addEventListener('click',openModal);
+        document.getElementById('quickAddBtn').addEventListener('click',()=>document.getElementById('transDesc').focus());
+        document.getElementById('captureBtn').addEventListener('click',captureAndOCR);
+        document.getElementById('switchCameraBtn').addEventListener('click',switchCamera);
+        document.getElementById('flashlightBtn').addEventListener('click',()=>toggleFlashlight());
+        document.getElementById('closeCameraBtn').addEventListener('click',closeModal);
+        document.getElementById('closeModalBtn').addEventListener('click',closeModal);
+        document.getElementById('chooseIncome').addEventListener('click',()=>processScan('income'));
+        document.getElementById('chooseExpense').addEventListener('click',()=>processScan('expense'));
+        
+        window.onclick = (e)=>{ if(e.target===modal) closeModal(); };
+        
+        document.querySelectorAll('.tab-btn').forEach(btn=>{ btn.addEventListener('click',()=>{ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); let tab=btn.dataset.tab; document.getElementById('loginForm').classList.toggle('hidden',tab!=='login'); document.getElementById('registerForm').classList.toggle('hidden',tab!=='register'); if(tab==='login') generateMathQuestion('login'); else generateMathQuestion('reg'); }); });
+        
+        generateMathQuestion('login'); generateMathQuestion('reg');
+    })();
+</script>
+</body>
+</html>
